@@ -13,7 +13,7 @@ public class DiscordDataParser
 
         ArrayList<Path> data = new ArrayList<Path>();
 
-        try
+        try //Read in path to data directory
         {
             path = args[0];
         }
@@ -23,7 +23,7 @@ public class DiscordDataParser
             System.exit(0);
         }
 
-        try
+        try //Ensures valid path
         {
             p = Paths.get(path);
         }
@@ -33,7 +33,7 @@ public class DiscordDataParser
             System.exit(0);
         }
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(p))
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(p)) //Try with resources ensures stream closure when done.
         {
             for (Path entry: stream)
             {
@@ -42,9 +42,16 @@ public class DiscordDataParser
                     Path temp;
                     try { temp = entry.resolve("messages.csv"); }
                     catch(InvalidPathException e) { continue; }
-                    data.add(temp);
+                    if(temp.toFile().exists())
+                    {
+                        data.add(temp);
+                    }
                 }
             }
+        }
+        catch(IOException e)
+        {
+            System.err.println("That directory does not exist.");
         }
 
 
