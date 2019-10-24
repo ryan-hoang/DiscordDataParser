@@ -1,7 +1,10 @@
 package discordparser.DataPackageParser;
 
-import java.io.File;
-import java.io.IOException;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
+import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 
@@ -33,6 +36,16 @@ public class DiscordDataParser
             System.exit(0);
         }
 
+
+
+
+
+    }
+
+    private ArrayList<Path> getPathsInDirectory(Path p)
+    {
+        ArrayList<Path> paths = new ArrayList<>();
+
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(p)) //Try with resources ensures stream closure when done.
         {
             for (Path entry: stream)
@@ -40,11 +53,18 @@ public class DiscordDataParser
                 if(entry.toFile().isDirectory())
                 {
                     Path temp;
-                    try { temp = entry.resolve("messages.csv"); }
-                    catch(InvalidPathException e) { continue; }
+                    try
+                    {
+                        temp = entry.resolve("messages.csv");
+                    }
+                    catch(InvalidPathException e)
+                    {
+                        continue;
+                    }
+
                     if(temp.toFile().exists())
                     {
-                        data.add(temp);
+                        paths.add(temp);
                     }
                 }
             }
@@ -53,9 +73,42 @@ public class DiscordDataParser
         {
             System.err.println("That directory does not exist.");
         }
+        return paths;
+    }
 
 
-        System.out.println(data);
+
+    /*
+    * @throws FileNotFoundException if parameter p does not point to a valid file.
+    * @throws IOException if the file is not able to be parsed.
+    * Returns an Iterable<CSVRecord> if the file specified by @param path is successfully parsed.
+    * Else returns null.
+     */
+    private Iterable<CSVRecord> extractRecords(Path p)
+    {
+        Reader input;
+        Iterable<CSVRecord> records;
+        try
+        {
+            input = new FileReader(p.toString());
+        }
+        catch(FileNotFoundException e)
+        {
+            System.err.println("FileNotFoundException while accessing: " + p.toString());
+            return null;
+        }
+
+        try
+        {
+            records = CSVFormat.RFC4180.parse(input);
+            return records;
+        }
+        catch (IOException e)
+        {
+            System.err.println("IOException while parsing message file: " + p.toString());
+            return null;
+        }
 
     }
+
 }
