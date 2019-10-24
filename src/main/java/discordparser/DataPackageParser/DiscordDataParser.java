@@ -1,20 +1,20 @@
 package discordparser.DataPackageParser;
 
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DiscordDataParser
 {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)
+    {
         String path = "";
         Path p = null;
-
-        ArrayList<Path> data = new ArrayList<Path>();
+        ArrayList<Path> data;
 
         try //Read in path to data directory
         {
@@ -36,13 +36,57 @@ public class DiscordDataParser
             System.exit(0);
         }
 
+        data = DiscordDataParser.getPathsInDirectory(p);
+        List<String> results = parse(data);
 
+        System.out.println("The results have been placed in the following files:");
+        for(String r : results)
+        {
+            System.out.println(r);
+        }
 
 
 
     }
 
-    private ArrayList<Path> getPathsInDirectory(Path p)
+
+    private static List<String> parse(Iterable<Path> messages)
+    {
+        String attachments = "Attachments.txt";
+        StringBuilder sb = new StringBuilder();
+        for(Path p : messages)
+        {
+            String contents = "";
+            Iterable<CSVRecord> temp = DiscordDataParser.extractRecords(p);
+            if(temp == null)
+            {
+                continue;
+            }
+            for(CSVRecord record: temp)
+            {
+                contents = record.get(3);
+                if(!contents.equals("") && !contents.equals("Attachments"))
+                {
+                    String[] items = contents.split(" ");
+                    for(String s: items)
+                    {
+                        sb.append(s);
+                        sb.append("\n");
+                    }
+
+                }
+            }
+        }
+
+        System.out.println(sb.toString());
+        ArrayList<String> todo = new ArrayList<String>();
+        todo.add("todo");
+
+        return todo;
+    }
+
+
+    private static ArrayList<Path> getPathsInDirectory(Path p)
     {
         ArrayList<Path> paths = new ArrayList<>();
 
@@ -84,7 +128,7 @@ public class DiscordDataParser
     * Returns an Iterable<CSVRecord> if the file specified by @param path is successfully parsed.
     * Else returns null.
      */
-    private Iterable<CSVRecord> extractRecords(Path p)
+    private static Iterable<CSVRecord> extractRecords(Path p)
     {
         Reader input;
         Iterable<CSVRecord> records;
