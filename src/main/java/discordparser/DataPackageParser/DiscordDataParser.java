@@ -49,7 +49,6 @@ public class DiscordDataParser
 
     }
 
-
     private static List<String> parse(Iterable<Path> messages)
     {
         String attachments = "Attachments.txt";
@@ -78,11 +77,20 @@ public class DiscordDataParser
             }
         }
 
-        System.out.println(sb.toString());
-        ArrayList<String> todo = new ArrayList<String>();
-        todo.add("todo");
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(attachments)))
+        {
+            writer.write(sb.toString());
+        }
+        catch(IOException e)
+        {
+            System.err.println("Error writing attachments to file.");
+        }
 
-        return todo;
+        ArrayList<String> files = new ArrayList<String>();
+        files.add(attachments);
+
+        return files;
+
     }
 
 
